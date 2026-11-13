@@ -148,8 +148,8 @@ try { S.lang = localStorage.getItem('us_lang') || 'he'; } catch (e) {}
 const T = {
   he: { models:'דוגמניות', inProgress:'באונבורדינג', waitingAgency:'ממתין לסוכנות', waitingUs:'ממתין לנו', live:'באוויר',
     rulesTitle:'כללי שיחה של הסוכנות', rulesSub:'ממלאים פעם אחת לכל הבנות. דוגמנית שאצלה זה שונה מקבלת חריג בעמוד שלה.', open:'פתיחה', cont:'המשך',
-    all:'הכול', nextAt:'הצעד הבא אצל', her:'פרטים אישיים', office:'פרופיל ותוכן', chat:'איך היא מדברת',
-    herWho:'ממלאת: הדוגמנית, בקישור שסער שולח', officeWho:'ממלא: סער', chatWho:'ממלא: סער',
+    all:'הכול', nextAt:'מי צריך לפעול', her:'פרטים אישיים', office:'פרופיל ותוכן', chat:'איך היא מדברת',
+    herWho:'ממלא: סער, מטעם הסוכנות', officeWho:'ממלא: סער, מטעם הסוכנות', chatWho:'ממלא: סער, מטעם הסוכנות',
     herDesc:'שם, גיל, עיר, מראה ועובדות מהחיים שלה.', officeDesc:'סוג הדמות, גבולות, רמות תוכן, חשבונות וערוץ.', chatDesc:'סגנון ההודעות, פגישות, ותיקונים לתשובות של הבוט.',
     road:'בדרך לפרודקשן', steps:'שלבים',
     missing:'מה חסר', confirm:'ממתינים לאישור', gatesT:'הדרך לפרודקשן', facts:'החיים שלה', conflicts:'סתירה שצריך להכריע',
@@ -164,8 +164,8 @@ const T = {
     readonly:'יש לך הרשאת צפייה בלבד, אז השינויים לא יישמרו.', saveFail:'לא נשמר. בדקו את החיבור ונסו שוב.' },
   en: { models:'Models', inProgress:'Onboarding', waitingAgency:'Waiting on agency', waitingUs:'Waiting on us', live:'Live',
     rulesTitle:'Agency chat rules', rulesSub:'Filled once for every model. A model who differs gets an exception on her page.', open:'Open', cont:'Continue',
-    all:'All', nextAt:'Next step', her:'Personal details', office:'Profile and content', chat:'How she talks',
-    herWho:'Filled by: the model, via a link Saar sends', officeWho:'Filled by: Saar', chatWho:'Filled by: Saar',
+    all:'All', nextAt:'Who acts next', her:'Personal details', office:'Profile and content', chat:'How she talks',
+    herWho:'Filled by: Saar, for the agency', officeWho:'Filled by: Saar', chatWho:'Filled by: Saar',
     herDesc:'Name, age, city, looks and facts from her life.', officeDesc:'Persona type, boundaries, content levels, accounts and channel.', chatDesc:'Message style, meetings, and fixes to the bot replies.',
     road:'Road to production', steps:'steps',
     missing:'Missing', confirm:'Waiting to confirm', gatesT:'Road to live', facts:'Her life', conflicts:'Conflict to resolve',
@@ -203,15 +203,15 @@ const FACT_TOPICS = [
 
 const Q = {
   her: [
-    { k:'fan_name', req:1, he:'איך קוראים לך מול המעריצים?', en:'What name do you use with fans?' },
-    { k:'age', req:1, he:'בת כמה את מציגה את עצמך?', en:'What age do you present?' },
-    { k:'city', req:1, he:'באיזו עיר את גרה, מול המעריצים?', en:'What city do you live in, for fans?' },
+    { k:'fan_name', req:1, he:'איך קוראים לה מול המעריצים?', en:'What name does she use with fans?' },
+    { k:'age', req:1, he:'בת כמה היא מציגה את עצמה?', en:'What age does she present?' },
+    { k:'city', req:1, he:'באיזו עיר היא גרה, מול המעריצים?', en:'What city does she live in, for fans?' },
     { k:'rel', req:1, type:'choice', he:'מצב זוגי, מול המעריצים', en:'Relationship status, for fans', opts:[['רווקה','Single'],['בזוגיות','In a relationship'],['נשואה','Married'],['לא מדברת על זה',"Doesn't talk about it"]] },
     { k:'hair', req:1, he:'שיער', en:'Hair' },
     { k:'eyes', req:1, he:'עיניים', en:'Eyes' },
     { k:'height', he:'גובה', en:'Height' },
-    { k:'job', he:'במה את עובדת, מול המעריצים?', en:'What do you do for work, for fans?' },
-    ...FACT_TOPICS.map(([k,he,en]) => ({ k:'fact_'+k, type:'fact', topic:k, he, en, hint:{ he:'משפט קצר, כמו שהיית אומרת למעריץ.', en:'One short sentence, the way you would tell a fan.' } }))
+    { k:'job', he:'במה היא עובדת, מול המעריצים?', en:'What does she do for work, for fans?' },
+    ...FACT_TOPICS.map(([k,he,en]) => ({ k:'fact_'+k, type:'fact', topic:k, he, en, hint:{ he:'משפט קצר, כמו שהיא הייתה אומרת למעריץ.', en:'One short sentence, the way she would tell a fan.' } }))
   ],
   office: [
     { k:'lang', req:1, type:'choice', he:'באיזו שפה היא כותבת כברירת מחדל?', en:'Default language', opts:[['עברית','Hebrew'],['אנגלית','English'],['עברית ואנגלית','Hebrew and English']] },
@@ -281,13 +281,16 @@ function modelStats(m) {
 function nextStep(m) {
   const st = modelStats(m), g = m.gates || {}, a = m.ans || {};
   const isDone = (k) => g[k] === 'done';
-  if (g.live === 'done') return { who:{he:'באוויר',en:'Live'}, side:'live' };
-  if (st.tr[0].pct < 100) return { who:{he:'הדוגמנית',en:'The model'}, side:'agency' };
-  if (st.tr[1].pct < 100) return { who:{he:'סער',en:'Saar'}, side:'agency' };
-  if (st.tr[2].pct < 100 || rulesStats().pct < 100) return { who:{he:'סער',en:'Saar'}, side:'agency' };
-  if (a.tg_own !== 'יש') return { who:{he:"ג'סי וסער",en:'Jesse and Saar'}, side:'agency' };
-  for (const G of GATES) if (!isDone(G.k)) return { who:G.o, side:G.side };
-  return { who:{he:'באוויר',en:'Live'}, side:'live' };
+  const AG = { he:'הסוכנות (סער)', en:'Agency (Saar)' }, US = { he:'UltraSelf', en:'UltraSelf' };
+  const tn = (k) => ({ he:T.he[k], en:T.en[k] });
+  if (g.live === 'done') return { who:{he:'באוויר',en:'Live'}, side:'live', what:{he:'הבוט שלה עובד מול מעריצים',en:'Her bot is talking to fans'} };
+  if (st.tr[0].pct < 100) return { who:AG, side:'agency', what:{he:'למלא: '+T.he.her,en:'Fill in: '+T.en.her} };
+  if (st.tr[1].pct < 100) return { who:AG, side:'agency', what:{he:'למלא: '+T.he.office,en:'Fill in: '+T.en.office} };
+  if (st.tr[2].pct < 100) return { who:AG, side:'agency', what:{he:'למלא: '+T.he.chat,en:'Fill in: '+T.en.chat} };
+  if (rulesStats().pct < 100) return { who:AG, side:'agency', what:{he:'למלא: כללי שיחה של הסוכנות',en:'Fill in: agency chat rules'} };
+  if (a.tg_own !== 'יש') return { who:AG, side:'agency', what:{he:'מספר טלגרם משלה',en:'Her own Telegram number'} };
+  for (const G of GATES) if (!isDone(G.k)) return { who:G.side === 'us' ? US : AG, side:G.side, what:{he:G.he,en:G.en} };
+  return { who:{he:'באוויר',en:'Live'}, side:'live', what:{he:'',en:''} };
 }
 function envOf(m) { const g = m.gates || {};
   if (g.live === 'done') return { cls:'live', he:'פרודקשן', en:'Production' };
@@ -311,6 +314,7 @@ function h(tag, attrs, ...kids) {
 }
 const bar = (p) => h('div', { class:'bar', role:'progressbar', 'aria-valuenow':p, 'aria-valuemin':0, 'aria-valuemax':100 }, h('i', { style:`width:${p}%` }));
 const pill = (ns) => h('span', { class:'pill ' + ns.side }, L(ns.who));
+const nextLine = (ns) => h('div', { class:'row', style:'flex-wrap:wrap;gap:6px' }, h('span', { class:'pct' }, t('nextAt')), pill(ns), ns.what && L(ns.what) ? h('span', { class:'pct', style:'color:var(--ink)' }, L(ns.what)) : null);
 
 /* ---------- views ---------- */
 function viewHome() {
@@ -345,7 +349,7 @@ function viewHome() {
       h('div', { class:'tracks' }, ['her','office','chat'].map((k, j) => [h('span', {}, t(k)), bar(st.tr[j].pct), h('span', { class:'pct' }, st.tr[j].pct + '%')])),
       h('div', { class:'row' }, h('span', { class:'pct' }, `${t('road')}: ${GATES.filter(G => g[G.k] === 'done').length} ${t('of')} ${GATES.length} ${t('steps')}`)),
       h('div', { class:'gdots', 'aria-label':t('gatesT') }, GATES.map(G => h('i', { class:g[G.k] || '', title:L(G) + ': ' + T[S.lang].status[g[G.k] || ''] }))),
-      h('div', { class:'row' }, h('span', { class:'pct' }, t('nextAt')), pill(ns[i]))));
+      nextLine(ns[i])));
   });
   v.append(grid);
   return v;
@@ -360,7 +364,7 @@ function viewModel(id) {
   v.append(h('div', { class:'mhead' },
     h('div', { class:'ring', style:`--p:${st.pct}` }, h('b', {}, st.pct + '%')),
     h('div', { style:'flex:1;min-width:200px' }, h('h1', {}, L(m.name)), h('p', { class:'lede' }, (m.agencyLabel || 'BALAGAN') + ' · ' + (m.lang || '') + ' · ', envPill(m))),
-    h('div', {}, h('span', { class:'pct' }, t('nextAt') + ' '), pill(ns))));
+    nextLine(ns)));
   if ((m.conflicts || []).length) v.append(h('div', { class:'alert', style:'margin-bottom:16px' }, h('b', {}, t('conflicts') + ': '), m.conflicts.map(c => L(c)).join(' · ')));
   const rail = h('section', { class:'rail', id:'gates', 'aria-label':t('gatesT') }, h('h2', { style:'margin-bottom:10px' }, t('gatesT')));
   rail.append(h('ol', {}, GATES.map(G => {
