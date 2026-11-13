@@ -1,0 +1,578 @@
+<!doctype html><html lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><style>body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>UltraSelf Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Assistant:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: agency portal. Top bar, then dashboard of model cards; a model opens to a gate rail + three tracks; a track opens a one-question-per-screen wizard. */
+:root{
+  --bg:#F2F5F6; --surface:#FFFFFF; --sunk:#E6ECEE; --ink:#1B2347; --muted:#5F6B7A; --line:#D6DEE2;
+  --accent:#2F7F74; --accent-ink:#FFFFFF; --accent-soft:#DCEEEB; --side:#2B3035;
+  --ok:#1E7A4F; --ok-soft:#DDF1E6; --warn:#9A5B00; --warn-soft:#FBEBCF; --bad:#B42318; --bad-soft:#FBE1DE;
+  --display:"Rubik","Assistant",system-ui,sans-serif; --body:"Assistant","Rubik",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#13171D; --surface:#1B2129; --sunk:#262E38; --ink:#E9EEF2; --muted:#9BA8B5; --line:#2F3945;
+  --accent:#6FBDB0; --accent-ink:#0D1A1C; --accent-soft:#17302E; --side:#0E1216;
+  --ok:#5BC98F; --ok-soft:#173226; --warn:#E3A84A; --warn-soft:#3A2B12; --bad:#F07A6E; --bad-soft:#3D1A17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13171D; --surface:#1B2129; --sunk:#262E38; --ink:#E9EEF2; --muted:#9BA8B5; --line:#2F3945;
+  --accent:#6FBDB0; --accent-ink:#0D1A1C; --accent-soft:#17302E; --side:#0E1216;
+  --ok:#5BC98F; --ok-soft:#173226; --warn:#E3A84A; --warn-soft:#3A2B12; --bad:#F07A6E; --bad-soft:#3D1A17; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+*{box-sizing:border-box}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--side)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--side);color:#F2F5F6}
+.top .in{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.01em;display:flex;align-items:center;gap:8px;cursor:pointer;background:none;border:0;padding:0}
+.brand{color:#F2F5F6}
+.brand img{width:30px;height:30px;border-radius:8px;background:#FFFFFF;display:block}
+.brand small{font-weight:500;color:#9FD3CB;font-size:14px}
+.top .agency{color:#B8C2CC;font-size:14px;border-inline-start:1px solid #4A525B;padding-inline-start:14px}
+.top .seg{border-color:#4A525B}
+.top .seg button{color:#F2F5F6}
+.top .seg button[aria-pressed="true"]{background:#F2F5F6;color:#2B3035}
+.demo{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;margin-top:16px;font-size:14px}
+.grow{flex:1}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:none;padding:4px 12px;cursor:pointer;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:26px;font-weight:700}
+h2{font-size:18px;font-weight:600}
+h3{font-size:15px;font-weight:600}
+.lede{color:var(--muted);margin:4px 0 0;max-width:62ch}
+.head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:24px 0 16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.stat b{display:block;font-family:var(--mono);font-size:24px;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:13px}
+.rules{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:18px}
+.rules .t{flex:1;min-width:220px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(27,35,71,.05);display:flex;flex-direction:column;gap:10px;cursor:pointer;text-align:start;transition:border-color .15s}
+.card:hover{border-color:var(--accent)}
+.card .row{display:flex;align-items:center;gap:8px}
+.card .name{font-family:var(--display);font-weight:600;font-size:17px;flex:1}
+.pct{font-family:var(--body);font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted)}
+.bar{height:6px;border-radius:99px;background:var(--sunk);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.tracks{display:grid;grid-template-columns:auto 1fr auto;gap:4px 8px;align-items:center;font-size:13px;color:var(--muted)}
+.tracks .bar{height:4px}
+.gdots{display:flex;gap:4px}
+.gdots i{width:100%;height:5px;border-radius:2px;background:var(--sunk)}
+.gdots i.done{background:var(--ok)} .gdots i.wip{background:var(--warn)} .gdots i.blocked{background:var(--bad)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;background:var(--sunk);color:var(--ink);white-space:nowrap}
+.pill.agency{background:var(--warn-soft);color:var(--warn)}
+.pill.us{background:var(--accent-soft);color:var(--accent)}
+.pill.live{background:var(--ok-soft);color:var(--ok)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);border-radius:999px;padding-inline:18px}
+.btn.ghost{background:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.back{background:none;border:0;color:var(--muted);cursor:pointer;padding:0;margin-top:20px;font-size:14px}
+/* model page */
+.mhead{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:8px 0 18px}
+.ring{--p:0;width:64px;height:64px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--sunk) 0);display:grid;place-items:center;flex:none}
+.ring b{width:50px;height:50px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-family:var(--mono);font-size:14px}
+.rail{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:16px;overflow-x:auto}
+.rail ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(9,minmax(104px,1fr));gap:8px;min-width:960px}
+.rail li{display:flex;flex-direction:column;gap:4px;border-top:4px solid var(--sunk);padding-top:8px}
+.rail li.done{border-color:var(--ok)} .rail li.wip{border-color:var(--warn)} .rail li.blocked{border-color:var(--bad)}
+.rail .g{font-weight:600;font-size:13px}
+.rail .o{font-size:12px;color:var(--muted)}
+.rail select{font-size:12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:2px 4px}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.panel .who{font-size:13px;color:var(--accent);font-weight:600}
+.panel ul{margin:0;padding-inline-start:18px;color:var(--muted);font-size:13px}
+.side{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.alert{border:1px solid var(--bad);background:var(--bad-soft);border-radius:var(--r);padding:12px 14px;font-size:14px}
+.alert b{color:var(--bad)}
+table.facts{width:100%;border-collapse:collapse;font-size:14px}
+table.facts td,table.facts th{text-align:start;padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+table.facts th{color:var(--muted);font-weight:500;font-size:12px}
+.share{font-size:12px}
+.soon{border:1px dashed var(--line);border-radius:var(--r);padding:14px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:8px}
+/* wizard */
+.wz{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wz .wtop{display:flex;align-items:center;gap:12px;padding:14px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:var(--surface)}
+.wz .wbody{flex:1;overflow:auto;display:flex;justify-content:center;padding:32px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.wz .q{width:100%;max-width:620px;display:flex;flex-direction:column;gap:14px}
+.wz .step{font-size:13px;color:var(--muted)}
+.wz .qt{font-family:var(--display);font-size:24px;font-weight:600;line-height:1.3}
+.wz .hint{color:var(--muted);margin:0}
+.wz textarea,.wz input[type=text]{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px;font-size:17px;min-height:52px}
+.wz textarea{min-height:120px;resize:vertical}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px;text-align:start;cursor:pointer;font-size:16px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.pre{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:8px 10px}
+.pre.ok{background:var(--ok-soft);color:var(--ok)}
+.bubble{border-radius:14px;padding:10px 14px;max-width:85%;font-size:15px}
+.bubble.fan{background:var(--sunk);align-self:flex-start}
+.bubble.bot{background:var(--accent-soft);align-self:flex-end}
+.chat{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface)}
+.chat small{color:var(--muted);font-size:12px}
+.wfoot{display:flex;gap:10px;align-items:center;padding:12px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--line);background:var(--surface)}
+.saved{font-size:12px;color:var(--muted)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:28px;text-align:center;color:var(--muted)}
+@media (max-width:860px){.cols{grid-template-columns:1fr}.side{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div id="app" dir="rtl" lang="he">
+  <header class="top"><div class="in">
+    <button class="brand" id="home-btn" type="button"><img alt="" src="data:image/png;base64,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">UltraSelf <small>Studio</small></button>
+    <span class="agency" id="agency-name"></span>
+    <span class="grow"></span>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" id="lang-he" aria-pressed="true">עב</button>
+      <button type="button" id="lang-en" aria-pressed="false">EN</button>
+    </div>
+  </div></header>
+  <main class="wrap"><div class="demo" id="demo-note" hidden></div><div id="view"><div class="empty" style="margin-top:24px">טוען את הדוגמניות…</div></div></main>
+</div>
+
+<script>
+(() => {
+const S = { lang: 'he', models: {}, agency: null, db: null, route: '', filter: 'all', wz: null, ready: false };
+try { S.lang = localStorage.getItem('us_lang') || 'he'; } catch (e) {}
+
+const T = {
+  he: { models:'דוגמניות', inProgress:'באונבורדינג', waitingAgency:'ממתין לסוכנות', waitingUs:'ממתין לנו', live:'באוויר',
+    rulesTitle:'כללי שיחה של הסוכנות', rulesSub:'ממלאים פעם אחת לכל הבנות. דוגמנית שאצלה זה שונה מקבלת חריג בעמוד שלה.', open:'פתיחה', cont:'המשך',
+    all:'הכול', nextAt:'הצעד הבא אצל', her:'פרטים אישיים', office:'פרופיל ותוכן', chat:'איך היא מדברת',
+    herWho:'ממלאת: הדוגמנית, בקישור שסער שולח', officeWho:'ממלא: סער', chatWho:'ממלא: סער',
+    herDesc:'שם, גיל, עיר, מראה ועובדות מהחיים שלה.', officeDesc:'סוג הדמות, גבולות, רמות תוכן, חשבונות וערוץ.', chatDesc:'סגנון ההודעות, פגישות, ותיקונים לתשובות של הבוט.',
+    road:'בדרך לפרודקשן', steps:'שלבים',
+    missing:'מה חסר', confirm:'ממתינים לאישור', gatesT:'הדרך לפרודקשן', facts:'החיים שלה', conflicts:'סתירה שצריך להכריע',
+    talk:'דברו איתה עכשיו', talkSoon:'בקרוב: שיחת ניסיון עם הבוט שלה, ממש מכאן.', voiceSoon:'בקרוב: לענות בהקלטה קולית',
+    back:'כל הדוגמניות', next:'הבא', prev:'הקודם', done:'סיום', skip:'היא לא מדברת על זה', saved:'נשמר', saving:'שומר…',
+    preFill:'מולא מראש מהטופס הקיים.', confirmBtn:'נכון, לאשר', confirmed:'אושר', of:'מתוך', step:'שאלה',
+    calQ:'איך קלדן טוב היה כותב את זה?', calFan:'הלקוח', calBot:'מה הבוט ענה',
+    share:'מותר לשתף?', persona:'חלק מהדמות', real:'פרט אמיתי, לא לשתף', yourCall:'תבחרו אתם',
+    noFacts:'עוד אין עובדות. הן נכנסות מהמסלול "פרטים אישיים".', live2:'באוויר',
+    signedOut:'צריך להתחבר כדי לראות ולמלא את הנתונים.', empty:'עוד אין דוגמניות בפורטל.',
+    start:'להתחיל', status:{'':'לא התחיל',wip:'בתהליך',done:'בוצע',blocked:'חסום'}, required:'חובה',
+    readonly:'יש לך הרשאת צפייה בלבד, אז השינויים לא יישמרו.', saveFail:'לא נשמר. בדקו את החיבור ונסו שוב.' },
+  en: { models:'Models', inProgress:'Onboarding', waitingAgency:'Waiting on agency', waitingUs:'Waiting on us', live:'Live',
+    rulesTitle:'Agency chat rules', rulesSub:'Filled once for every model. A model who differs gets an exception on her page.', open:'Open', cont:'Continue',
+    all:'All', nextAt:'Next step', her:'Personal details', office:'Profile and content', chat:'How she talks',
+    herWho:'Filled by: the model, via a link Saar sends', officeWho:'Filled by: Saar', chatWho:'Filled by: Saar',
+    herDesc:'Name, age, city, looks and facts from her life.', officeDesc:'Persona type, boundaries, content levels, accounts and channel.', chatDesc:'Message style, meetings, and fixes to the bot replies.',
+    road:'Road to production', steps:'steps',
+    missing:'Missing', confirm:'Waiting to confirm', gatesT:'Road to live', facts:'Her life', conflicts:'Conflict to resolve',
+    talk:'Talk to her now', talkSoon:'Soon: a test chat with her bot, right from here.', voiceSoon:'Soon: answer with a voice note',
+    back:'All models', next:'Next', prev:'Back', done:'Finish', skip:"She doesn't talk about this", saved:'Saved', saving:'Saving…',
+    preFill:'Prefilled from the existing form.', confirmBtn:'Correct, confirm', confirmed:'Confirmed', of:'of', step:'Question',
+    calQ:'How would a good chatter write this?', calFan:'Fan', calBot:'What the bot said',
+    share:'OK to share?', persona:'Part of the persona', real:'Real detail, never share', yourCall:'You choose',
+    noFacts:'No facts yet. They come from the "Personal details" track.', live2:'Live',
+    signedOut:'Sign in to see and fill in the data.', empty:'No models in the portal yet.',
+    start:'Start', status:{'':'Not started',wip:'In progress',done:'Done',blocked:'Blocked'}, required:'Required',
+    readonly:'You have view-only access, so changes will not be saved.', saveFail:'Not saved. Check the connection and try again.' }
+};
+const t = (k) => T[S.lang][k];
+const L = (o) => (o && typeof o === 'object') ? (o[S.lang] || o.he) : o;
+
+const OWN = { agency: { he:'הסוכנות', en:'Agency' } };
+const GATES = [
+  { k:'export', he:'יצוא שיחות זמין', en:'Chat export available', o:{he:'UltraSelf',en:'UltraSelf'}, side:'us' },
+  { k:'channel_admin', he:'הרשאת ניהול בערוץ', en:'Channel admin access', o:{he:'סער',en:'Saar'}, side:'agency' },
+  { k:'unlockly', he:'Unlockly מחובר', en:'Unlockly connected', o:{he:'ארקדי',en:'Arkadi'}, side:'us' },
+  { k:'vault', he:'מדיה ב-vault', en:'Media in vault', o:{he:'UltraSelf',en:'UltraSelf'}, side:'us' },
+  { k:'persona', he:'פרסונה ב-staging', en:'Persona on staging', o:{he:'UltraSelf',en:'UltraSelf'}, side:'us' },
+  { k:'loaded', he:'הפרטים נטענו לבוט', en:'Profile loaded into bot', o:{he:'UltraSelf',en:'UltraSelf'}, side:'us' },
+  { k:'saar_test', he:'בדיקת סער', en:"Saar's test", o:{he:'סער',en:'Saar'}, side:'agency' },
+  { k:'approve', he:'אישור עלייה לאוויר', en:'Go-live approval', o:{he:'UltraSelf',en:'UltraSelf'}, side:'us' },
+  { k:'live', he:'בפרודקשן', en:'In production', o:{he:'UltraSelf',en:'UltraSelf'}, side:'us' }
+];
+
+const FACT_TOPICS = [
+  ['hometown','עיר ילדות','Hometown'],['family','משפחה','Family'],['pets','חיות','Pets'],['study','לימודים','Studies'],
+  ['work','עבודה','Work'],['food','אוכל ושתייה','Food and drink'],['music','מוזיקה','Music'],['tv','טלוויזיה וסדרות','TV and series'],
+  ['sport','ספורט','Sports'],['going_out','בילויים','Going out'],['travel','טיולים','Travel'],['free','זמן פנוי','Free time'],['quirk','משהו שמעריצים אוהבים','Something fans love']
+];
+
+const Q = {
+  her: [
+    { k:'fan_name', req:1, he:'איך קוראים לך מול המעריצים?', en:'What name do you use with fans?' },
+    { k:'age', req:1, he:'בת כמה את מציגה את עצמך?', en:'What age do you present?' },
+    { k:'city', req:1, he:'באיזו עיר את גרה, מול המעריצים?', en:'What city do you live in, for fans?' },
+    { k:'rel', req:1, type:'choice', he:'מצב זוגי, מול המעריצים', en:'Relationship status, for fans', opts:[['רווקה','Single'],['בזוגיות','In a relationship'],['נשואה','Married'],['לא מדברת על זה',"Doesn't talk about it"]] },
+    { k:'hair', req:1, he:'שיער', en:'Hair' },
+    { k:'eyes', req:1, he:'עיניים', en:'Eyes' },
+    { k:'height', he:'גובה', en:'Height' },
+    { k:'job', he:'במה את עובדת, מול המעריצים?', en:'What do you do for work, for fans?' },
+    ...FACT_TOPICS.map(([k,he,en]) => ({ k:'fact_'+k, type:'fact', topic:k, he, en, hint:{ he:'משפט קצר, כמו שהיית אומרת למעריץ.', en:'One short sentence, the way you would tell a fan.' } }))
+  ],
+  office: [
+    { k:'lang', req:1, type:'choice', he:'באיזו שפה היא כותבת כברירת מחדל?', en:'Default language', opts:[['עברית','Hebrew'],['אנגלית','English'],['עברית ואנגלית','Hebrew and English']] },
+    { k:'persona_type', req:1, he:'סוג הדמות', en:'Persona type', hint:{he:'לדוגמה: בת השכן, מטפלת, יוקרתית, שולטת', en:'For example: girl next door, therapist, high class, dominant'} },
+    { k:'personality', req:1, type:'long', he:'האופי שלה בכמה מילים', en:'Her personality in a few words' },
+    { k:'traits', req:1, type:'long', he:'שלוש תכונות אופי, ואיך כל אחת נראית בהודעות שלה', en:'Three character traits, and how each one shows in her messages', hint:{he:'לדוגמה: אסרטיבית, היא זו שמובילה את השיחה ושואלת את השאלות', en:'For example: assertive, she leads the chat and asks the questions'} },
+    { k:'not_her', type:'long', he:'מה היא לא? טון או התנהגות שלא מתאימים לה', en:'What is she NOT? Tone or behaviour that would feel wrong for her' },
+    { k:'never_does', req:1, type:'long', he:'מה היא אף פעם לא עושה?', en:'What does she never do?', hint:{he:'לדוגמה: נפגשת, שיחות וידאו, הזמנות אישיות',en:'For example: meeting fans, video calls, custom requests'} },
+    { k:'lvl_channel', req:1, he:'רמת תוכן מותרת בערוץ', en:'Content level allowed in the channel' },
+    { k:'lvl_paid', req:1, he:"רמת תוכן מותרת בתשלום ובצ'אט", en:'Content level allowed in paid content and chat' },
+    { k:'never_shows', he:'מה היא אף פעם לא מראה?', en:'What does she never show?' },
+    { k:'unlockly', req:1, he:'שם ה-workspace שלה ב-Unlockly', en:'Her Unlockly workspace name' },
+    { k:'tg_channel', req:1, he:'קישור לערוץ הטלגרם שלה', en:'Link to her Telegram channel' },
+    { k:'tg_own', req:1, type:'choice', he:'יש לה מספר טלגרם משלה?', en:'Does she have her own Telegram number?', opts:[['יש','Yes'],['בתהליך','In progress'],['אין','No']] },
+    { k:'post_themes', he:'נושאים שחוזרים בפוסטים שלה', en:'Recurring post themes' },
+    { k:'post_never', he:'מה פוסט שלה אף פעם לא עושה?', en:'What should a post of hers never do?' },
+    { k:'opener', type:'long', he:'הודעת הפתיחה למעריץ חדש', en:'Opening message to a new fan' }
+  ],
+  chat: [
+    { k:'style', req:1, type:'long', he:"איך ההודעות שלה נראות בצ'אט?", en:'What do her chat messages look like?', hint:{he:'אורך, פיסוק, כמה הודעות ברצף, שאלה בסוף, כינויים',en:'Length, punctuation, how many messages in a row, a question at the end, pet names'} },
+    { k:'meet', req:1, type:'long', he:'"בואי ניפגש": מה היא עונה?', en:'"Can we meet?": what does she say?' },
+    { k:'avoid', type:'long', he:'נושאים שלא מדברים איתה עליהם', en:'Topics never to raise with her' },
+    { k:'exceptions', type:'long', he:'משהו שאצלה שונה מכללי השיחה של הסוכנות?', en:"Anything different for her from the agency's chat rules?" }
+  ]
+};
+const RULES = [
+  ['first_offer','הצעת תוכן ראשונה','First content offer','מה צריך לקרות בשיחה לפני שמציעים תוכן, ואיזה סימן מהלקוח אומר שהוא מוכן?','What needs to happen before the first offer, and what sign says he is ready?'],
+  ['direct','בקשה מינית ישירה','Direct sexual request','לקוח שמבקש ממנה משהו מיני ישר, בלי לבקש תוכן: מה עונים?','A fan asks her for something sexual directly, not for content: what do we answer?'],
+  ['meet','בואי ניפגש','"Can we meet?"','מה הנוסח, כמה פתח משאירים, ומה אסור להבטיח?','What is the wording, how much door is left open, and what must never be promised?'],
+  ['bot','את בוט?','"Are you a bot?"','מה עונים בפעם הראשונה, ומה אם הוא חוזר על זה או מבקש הוכחה?','What do we answer the first time, and if he insists or asks for proof?'],
+  ['returning','לקוח שחוזר','Returning fan','לקוח שחוזר אחרי כמה שעות או ימים: איך פותחים איתו?','A fan comes back after hours or days: how do we open?'],
+  ['after_buy','אחרי רכישה','After a purchase','מה ההודעה הבאה, וכמה מחכים לפני הצעה נוספת?','What is the next message, and how long before the next offer?'],
+  ['never_write','מה אף פעם לא כותבים','Never write','שלושה דברים שקלדן טוב אף פעם לא כותב.','Three things a good chatter never writes.'],
+  ['style','סגנון כתיבה','Writing style','אורך, פיסוק, פיצול לכמה הודעות, שאלה בסוף, כינויים.','Length, punctuation, split messages, a question at the end, pet names.'],
+  ['haggle','התמקחות','Haggling','לקוח שמתמקח על מחיר: מה עונים, ועד איפה יורדים?','A fan haggles: what do we answer, and how low do we go?'],
+  ['refund','לקוח כועס או החזר','Upset fan or refund','מה עונים, ומתי מעבירים לאדם?','What do we answer, and when does a person take over?'],
+  ['custom','הזמנה אישית','Custom content','מציעים? מחיר, זמן אספקה, ולמי הבקשה עוברת.','Offered? Price, delivery time, and who gets the request.'],
+  ['video','שיחות וידאו וטלפון','Video and phone calls','מציעים? אם לא, מה עונים למי שמבקש?','Offered? If not, what do we answer?'],
+  ['response','זמן תגובה','Response time','תוך כמה זמן עונים בשיחת חולין, ותוך כמה זמן בשיחה חמה?','How fast in small talk, and how fast in a hot chat?'],
+  ['min_price','מחיר מינימום והנחות','Minimum price and discounts','מחיר שלא יורדים ממנו, וכללים להנחות, חבילות וחגים.','A price never to go below, and rules for discounts, bundles and holidays.'],
+  ['pol_custom','החלטה: הזמנה אישית בבוט','Decision: custom content in the bot','הבוט לא יכול לצלם. כשמעריץ מבקש הזמנה אישית: להעביר לאדם, או לסרב ולהציע תוכן קיים?','The bot cannot shoot new content. When a fan asks for a custom: hand over to a person, or decline and offer existing content?'],
+  ['pol_discount','החלטה: הנחות','Decision: discounts','מותר לבוט לתת הנחה, או רק להציע פריט זול יותר?','May the bot give a discount, or only offer a cheaper item?'],
+  ['pol_bundle','החלטה: חבילות ומנויים','Decision: bundles and subscriptions','מותר לבוט להציע חבילות ומנויים? אם כן, אילו?','May the bot offer bundles and subscriptions? If yes, which?'],
+  ['pol_meet','החלטה: פגישות ושיחות','Decision: meetings and calls','כשמעריץ מבקש פגישה או שיחה: האם תמיד מסרבים ומציעים תוכן קיים במקום?','When a fan asks to meet or call: do we always decline and offer existing content instead?']
+];
+
+/* ---------- derived state ---------- */
+const filled = (v) => v != null && String(v).trim() !== '';
+function trackStats(m, tr) {
+  const qs = Q[tr].filter(q => q.req);
+  const a = m.ans || {};
+  const done = qs.filter(q => filled(a[q.k])).length;
+  const missing = qs.filter(q => !filled(a[q.k]));
+  const unconf = Q[tr].filter(q => filled(a[q.k]) && (m.pre || []).includes(q.k) && !(m.conf || {})[q.k]).length;
+  return { done, total: qs.length, pct: qs.length ? Math.round(done / qs.length * 100) : 100, missing, unconf };
+}
+function rulesStats() {
+  const r = (S.agency && S.agency.rules) || {};
+  const done = RULES.filter(([k]) => filled((r[k] || {}).a)).length;
+  return { done, total: RULES.length, pct: Math.round(done / RULES.length * 100) };
+}
+function modelStats(m) {
+  const tr = ['her','office','chat'].map(k => trackStats(m, k));
+  const done = tr.reduce((s, x) => s + x.done, 0), total = tr.reduce((s, x) => s + x.total, 0);
+  return { tr, pct: Math.round(done / total * 100) };
+}
+function nextStep(m) {
+  const st = modelStats(m), g = m.gates || {}, a = m.ans || {};
+  const isDone = (k) => g[k] === 'done';
+  if (g.live === 'done') return { who:{he:'באוויר',en:'Live'}, side:'live' };
+  if (st.tr[0].pct < 100) return { who:{he:'הדוגמנית',en:'The model'}, side:'agency' };
+  if (st.tr[1].pct < 100) return { who:{he:'סער',en:'Saar'}, side:'agency' };
+  if (st.tr[2].pct < 100 || rulesStats().pct < 100) return { who:{he:'סער',en:'Saar'}, side:'agency' };
+  if (a.tg_own !== 'יש') return { who:{he:"ג'סי וסער",en:'Jesse and Saar'}, side:'agency' };
+  for (const G of GATES) if (!isDone(G.k)) return { who:G.o, side:G.side };
+  return { who:{he:'באוויר',en:'Live'}, side:'live' };
+}
+function envOf(m) { const g = m.gates || {};
+  if (g.live === 'done') return { cls:'live', he:'פרודקשן', en:'Production' };
+  if (g.persona === 'done') return { cls:'us', he:'Staging בלבד', en:'Staging only' };
+  return { cls:'', he:'עוד לא במערכת', en:'Not in the system yet' }; }
+const envPill = (m) => { const e = envOf(m); return h('span', { class:'pill ' + e.cls }, L(e)); };
+const sorted = () => Object.values(S.models).sort((x, y) => (x.order || 0) - (y.order || 0));
+
+/* ---------- dom helpers ---------- */
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'style') el.setAttribute('style', v);
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat(Infinity)) if (c != null && c !== false) el.append(c instanceof Node ? c : document.createTextNode(String(c)));
+  return el;
+}
+const bar = (p) => h('div', { class:'bar', role:'progressbar', 'aria-valuenow':p, 'aria-valuemin':0, 'aria-valuemax':100 }, h('i', { style:`width:${p}%` }));
+const pill = (ns) => h('span', { class:'pill ' + ns.side }, L(ns.who));
+
+/* ---------- views ---------- */
+function viewHome() {
+  const ms = sorted();
+  const v = h('div', {});
+  v.append(h('div', { class:'head' }, h('div', {}, h('h1', {}, S.lang === 'he' ? 'אונבורדינג דוגמניות' : 'Model onboarding'),
+    h('p', { class:'lede' }, S.lang === 'he' ? 'כל דוגמנית בדרך מהטופס הראשון ועד שהבוט שלה באוויר. רואים מה חסר ואצל מי.' : 'Every model, from the first form until her bot is live. See what is missing and who has it.'))));
+  if (!ms.length) { v.append(h('div', { class:'empty' }, S.db ? t('empty') : t('signedOut'))); return v; }
+  const ns = ms.map(nextStep);
+  const cnt = (side) => ns.filter(n => n.side === side).length;
+  v.append(h('div', { class:'stats' },
+    h('div', { class:'stat' }, h('b', {}, ms.length), h('span', {}, t('models'))),
+    h('div', { class:'stat' }, h('b', {}, cnt('agency')), h('span', {}, t('waitingAgency'))),
+    h('div', { class:'stat' }, h('b', {}, cnt('us')), h('span', {}, t('waitingUs'))),
+    h('div', { class:'stat' }, h('b', {}, ms.filter(m => envOf(m).cls === 'us').length), h('span', {}, S.lang === 'he' ? 'ב-staging בלבד' : 'On staging only')),
+    h('div', { class:'stat' }, h('b', {}, cnt('live')), h('span', {}, S.lang === 'he' ? 'בפרודקשן' : 'In production'))));
+  const rs = rulesStats();
+  v.append(h('section', { class:'rules', id:'agency-rules' },
+    h('div', { class:'t' }, h('h2', {}, t('rulesTitle')), h('p', { class:'lede' }, t('rulesSub'))),
+    h('div', { style:'min-width:160px;flex:0 1 220px' }, h('div', { class:'row', style:'display:flex;justify-content:space-between' }, h('span', { class:'pct' }, `${rs.done} ${t('of')} ${rs.total}`), h('span', { class:'pct' }, rs.pct + '%')), bar(rs.pct)),
+    h('button', { class:'btn primary', type:'button', onclick:() => openWizard('rules', null) }, rs.done ? t('cont') : t('start'))));
+  const owners = [...new Set(ns.map(n => L(n.who)))];
+  v.append(h('div', { class:'chips', role:'group', 'aria-label':t('nextAt') },
+    [t('all'), ...owners].map((o, i) => h('button', { class:'chip', type:'button', 'aria-pressed':String(S.filter === (i ? o : 'all')), onclick:() => { S.filter = i ? o : 'all'; render(); } }, i ? `${t('nextAt')}: ${o}` : o))));
+  const grid = h('div', { class:'grid', id:'model-grid' });
+  ms.forEach((m, i) => {
+    if (S.filter !== 'all' && L(ns[i].who) !== S.filter) return;
+    const st = modelStats(m), g = m.gates || {};
+    grid.append(h('button', { class:'card', type:'button', id:'card-' + m.id, onclick:() => go('m-' + m.id) },
+      h('div', { class:'row' }, h('span', { class:'name' }, L(m.name)), envPill(m), h('span', { class:'pct' }, st.pct + '%')),
+      bar(st.pct),
+      h('div', { class:'tracks' }, ['her','office','chat'].map((k, j) => [h('span', {}, t(k)), bar(st.tr[j].pct), h('span', { class:'pct' }, st.tr[j].pct + '%')])),
+      h('div', { class:'row' }, h('span', { class:'pct' }, `${t('road')}: ${GATES.filter(G => g[G.k] === 'done').length} ${t('of')} ${GATES.length} ${t('steps')}`)),
+      h('div', { class:'gdots', 'aria-label':t('gatesT') }, GATES.map(G => h('i', { class:g[G.k] || '', title:L(G) + ': ' + T[S.lang].status[g[G.k] || ''] }))),
+      h('div', { class:'row' }, h('span', { class:'pct' }, t('nextAt')), pill(ns[i]))));
+  });
+  v.append(grid);
+  return v;
+}
+
+function viewModel(id) {
+  const m = S.models[id];
+  if (!m) return h('div', { class:'empty', style:'margin-top:24px' }, t('empty'));
+  const st = modelStats(m), ns = nextStep(m), g = m.gates || {};
+  const v = h('div', {});
+  v.append(h('button', { class:'back', type:'button', onclick:() => go('') }, (S.lang === 'he' ? '→ ' : '← ') + t('back')));
+  v.append(h('div', { class:'mhead' },
+    h('div', { class:'ring', style:`--p:${st.pct}` }, h('b', {}, st.pct + '%')),
+    h('div', { style:'flex:1;min-width:200px' }, h('h1', {}, L(m.name)), h('p', { class:'lede' }, (m.agencyLabel || 'BALAGAN') + ' · ' + (m.lang || '') + ' · ', envPill(m))),
+    h('div', {}, h('span', { class:'pct' }, t('nextAt') + ' '), pill(ns))));
+  if ((m.conflicts || []).length) v.append(h('div', { class:'alert', style:'margin-bottom:16px' }, h('b', {}, t('conflicts') + ': '), m.conflicts.map(c => L(c)).join(' · ')));
+  const rail = h('section', { class:'rail', id:'gates', 'aria-label':t('gatesT') }, h('h2', { style:'margin-bottom:10px' }, t('gatesT')));
+  rail.append(h('ol', {}, GATES.map(G => {
+    const sel = h('select', { id:`gate-${id}-${G.k}`, 'aria-label':L(G), onchange:(e) => saveGate(id, G.k, e.target.value) },
+      ['', 'wip', 'done', 'blocked'].map(s => h('option', { value:s }, T[S.lang].status[s])));
+    sel.value = g[G.k] || '';
+    return h('li', { class:g[G.k] || '' }, h('span', { class:'g' }, L(G)), h('span', { class:'o' }, L(G.o)), sel);
+  })));
+  v.append(rail);
+  const who = { her:'herWho', office:'officeWho', chat:'chatWho' };
+  v.append(h('div', { class:'cols', id:'tracks' }, ['her','office','chat'].map((k, j) => {
+    const x = st.tr[j];
+    return h('section', { class:'panel', id:'track-' + k },
+      h('h2', {}, t(k)), h('span', { class:'who' }, t(who[k])), h('p', { class:'lede', style:'margin:0;font-size:13px' }, t(k + 'Desc')),
+      h('div', { style:'display:flex;justify-content:space-between' }, h('span', { class:'pct' }, `${x.done} ${t('of')} ${x.total} ${t('required')}`), h('span', { class:'pct' }, x.pct + '%')), bar(x.pct),
+      x.unconf ? h('span', { class:'pill agency', style:'align-self:flex-start' }, `${x.unconf} ${t('confirm')}`) : null,
+      x.missing.length ? h('div', {}, h('h3', { style:'font-size:13px;color:var(--muted);margin-bottom:4px' }, t('missing')), h('ul', {}, x.missing.map(q => h('li', {}, L(q))))) : null,
+      h('button', { class:'btn ' + (x.pct < 100 || x.unconf ? 'primary' : 'ghost'), type:'button', onclick:() => openWizard(k, id) }, x.done ? t('cont') : t('start')));
+  })));
+  if ((m.measured || []).length) {
+    v.append(h('section', { class:'panel', id:'measured', style:'margin-bottom:16px' }, h('h2', {}, S.lang === 'he' ? 'נאמר מול נמדד' : 'Said vs measured'),
+      h('p', { class:'lede' }, S.lang === 'he' ? 'מה הסוכנות כתבה, ליד מה שהשיחות האמיתיות שלה מראות.' : 'What the agency wrote, next to what her real chats show.'),
+      h('div', { style:'overflow-x:auto' }, h('table', { class:'facts', style:'min-width:640px' },
+        h('thead', {}, h('tr', {}, h('th', {}, ''), h('th', {}, S.lang === 'he' ? 'נאמר' : 'Said'), h('th', {}, S.lang === 'he' ? 'נמדד בשיחות' : 'Measured in chats'), h('th', {}, ''))),
+        h('tbody', {}, m.measured.map(r => h('tr', {}, h('td', { style:'white-space:nowrap;font-weight:600' }, L(r.topic)), h('td', {}, L(r.said)), h('td', {}, L(r.measured)),
+          h('td', {}, h('span', { class:'pill ' + (r.gap ? 'agency' : 'live') }, r.gap ? (S.lang === 'he' ? 'פער' : 'Gap') : (S.lang === 'he' ? 'תואם' : 'Match'))))))))));
+  }
+  const facts = (m.facts || []).filter(f => filled(f.text));
+  const ft = h('section', { class:'panel', id:'facts' }, h('h2', {}, t('facts')));
+  if (!facts.length) ft.append(h('p', { class:'lede' }, t('noFacts')));
+  else ft.append(h('div', { style:'overflow-x:auto' }, h('table', { class:'facts' },
+    h('thead', {}, h('tr', {}, h('th', {}, ''), h('th', {}, ''), h('th', {}, t('share')))),
+    h('tbody', {}, facts.map(f => {
+      const tp = FACT_TOPICS.find(x => x[0] === f.topic);
+      const lab = { persona:['pill live', t('persona')], real:['pill agency', t('real')], yours:['pill', t('yourCall')] }[f.share] || ['pill agency', S.lang === 'he' ? 'לסמן' : 'To mark'];
+      return h('tr', {}, h('td', { style:'white-space:nowrap;color:var(--muted)' }, tp ? (S.lang === 'he' ? tp[1] : tp[2]) : f.topic), h('td', {}, f.text), h('td', {}, h('span', { class:lab[0] + ' share' }, lab[1])));
+    })))));
+  v.append(h('div', { class:'side' }, ft,
+    h('div', { class:'soon', id:'talk' }, h('h3', { style:'color:var(--ink)' }, t('talk')), h('span', {}, t('talkSoon')), h('button', { class:'btn', type:'button', disabled:true }, t('talk')))));
+  return v;
+}
+
+/* ---------- wizard ---------- */
+function wizardItems(kind, id) {
+  if (kind === 'rules') return RULES.map(([k, he, en, qhe, qen]) => ({ k, type:'rule', he, en, hint:{ he:qhe, en:qen }, req:1 }));
+  const m = S.models[id], items = [...Q[kind]];
+  if (kind === 'chat') (m.calItems || []).forEach((c, i) => items.push({ k:'cal_' + i, type:'cal', cal:c, he:t('calQ'), en:t('calQ') }));
+  return items;
+}
+function openWizard(kind, id) { S.wz = { kind, id, i:0, items:wizardItems(kind, id), note:'' }; renderWizard(); }
+function closeWizard() { S.wz = null; document.getElementById('wz')?.remove(); render(); }
+
+function currentValue(item) {
+  const { kind, id } = S.wz;
+  if (kind === 'rules') return ((S.agency.rules || {})[item.k] || {}).a || '';
+  const m = S.models[id];
+  if (item.type === 'fact') { const f = (m.facts || []).find(x => x.topic === item.topic); return f ? f.text : ''; }
+  if (item.type === 'cal') return (m.cal || {})[item.k] || '';
+  return (m.ans || {})[item.k] || '';
+}
+
+function renderWizard() {
+  document.getElementById('wz')?.remove();
+  const W = S.wz; if (!W) return;
+  const item = W.items[W.i], n = W.items.length;
+  const m = W.id ? S.models[W.id] : null;
+  const title = W.kind === 'rules' ? t('rulesTitle') : `${L(m.name)} · ${t(W.kind)}`;
+  let val = currentValue(item);
+  let share = '';
+  if (item.type === 'fact') { const f = (m.facts || []).find(x => x.topic === item.topic); share = f ? f.share || '' : ''; }
+  const q = h('div', { class:'q' });
+  q.append(h('span', { class:'step' }, `${t('step')} ${W.i + 1} ${t('of')} ${n}${item.req ? ' · ' + t('required') : ''}`));
+  if (item.type === 'cal') {
+    q.append(h('div', { class:'chat' }, h('small', {}, t('calFan')), h('div', { class:'bubble fan' }, L(item.cal.fan)), h('small', { style:'align-self:flex-end' }, t('calBot')), h('div', { class:'bubble bot' }, item.cal.bot)));
+  }
+  q.append(h('div', { class:'qt', id:'wz-title' }, item.type === 'rule' ? L(item) + ': ' + L(item.hint) : L(item)));
+  if (item.hint && item.type !== 'rule') q.append(h('p', { class:'hint' }, L(item.hint)));
+  const isPre = m && (m.pre || []).includes(item.k) && filled(val);
+  if (isPre) {
+    const ok = (m.conf || {})[item.k];
+    q.append(h('div', { class:'pre' + (ok ? ' ok' : '') }, ok ? t('confirmed') : t('preFill'),
+      ok ? null : h('button', { class:'btn', type:'button', style:'padding:3px 10px', onclick:() => { save({ confirm:item.k }).then(() => { renderWizard(); }); } }, t('confirmBtn'))));
+  }
+  let input;
+  if (item.type === 'choice') {
+    input = h('div', { class:'opts', role:'group', 'aria-labelledby':'wz-title' }, item.opts.map(([he, en]) => h('button', { class:'opt', type:'button', 'aria-pressed':String(val === he), onclick:() => { val = he; save({ value:he }).then(renderWizard); } }, S.lang === 'he' ? he : en)));
+  } else {
+    const long = item.type === 'long' || item.type === 'rule' || item.type === 'cal' || item.type === 'fact';
+    input = h(long ? 'textarea' : 'input', { id:'wz-input', 'aria-labelledby':'wz-title', type:long ? null : 'text', dir:'auto' });
+    input.value = val;
+  }
+  q.append(input);
+  if (item.type === 'fact') {
+    q.append(h('div', { class:'hint' }, t('share')));
+    q.append(h('div', { class:'opts', role:'group' }, [['persona', t('persona')], ['real', t('real')], ['yours', t('yourCall')]].map(([k, lab]) =>
+      h('button', { class:'opt', type:'button', 'aria-pressed':String(share === k), onclick:() => { save({ value:document.getElementById('wz-input').value, share:k }).then(renderWizard); } }, lab))));
+  }
+  if (W.kind === 'her' && item.type !== 'choice') q.append(h('button', { class:'btn ghost', type:'button', style:'align-self:flex-start', onclick:() => { save({ value:t('skip') }).then(() => step(1)); } }, t('skip')));
+  q.append(h('span', { class:'saved', title:t('voiceSoon') }, t('voiceSoon')));
+  const pct = Math.round((W.i + 1) / n * 100);
+  const wz = h('div', { class:'wz', id:'wz', role:'dialog', 'aria-modal':'true', 'aria-label':title, dir:S.lang === 'he' ? 'rtl' : 'ltr' },
+    h('div', { class:'wtop' }, h('button', { class:'btn ghost', type:'button', onclick:closeWizard, 'aria-label':'Close' }, '✕'), h('h3', { style:'flex:1' }, title), h('span', { class:'pct' }, pct + '%')),
+    h('div', { style:'height:3px;background:var(--sunk)' }, h('i', { style:`display:block;height:3px;width:${pct}%;background:var(--accent)` })),
+    h('div', { class:'wbody' }, q),
+    h('div', { class:'wfoot' },
+      h('button', { class:'btn', type:'button', disabled:W.i === 0, onclick:() => step(-1) }, t('prev')),
+      h('span', { class:'saved grow', id:'wz-note' }, W.note),
+      h('button', { class:'btn primary', type:'button', onclick:() => step(1) }, W.i === n - 1 ? t('done') : t('next'))));
+  document.body.append(wz);
+  const inp = document.getElementById('wz-input'); if (inp) { inp.focus(); inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && inp.tagName === 'INPUT') step(1); }); }
+}
+
+async function step(d) {
+  const inp = document.getElementById('wz-input');
+  if (inp && inp.value !== currentValue(S.wz.items[S.wz.i])) await save({ value:inp.value });
+  const n = S.wz.items.length;
+  if (S.wz.i + d >= n) return closeWizard();
+  S.wz.i = Math.max(0, S.wz.i + d); renderWizard();
+}
+
+async function save({ value, share, confirm }) {
+  const W = S.wz, item = W.items[W.i];
+  const note = (s) => { W.note = s; const el = document.getElementById('wz-note'); if (el) el.textContent = s; };
+  note(t('saving'));
+  try {
+    if (W.kind === 'rules') {
+      const rules = { ...(S.agency.rules || {}) };
+      rules[item.k] = { ...(rules[item.k] || {}), a:value };
+      S.agency.rules = rules;
+      if (S.db) await S.db.doc('agency/balagan').update({ rules });
+    } else {
+      const m = S.models[W.id], patch = {};
+      if (confirm) { m.conf = { ...(m.conf || {}), [confirm]:true }; patch.conf = m.conf; }
+      else if (item.type === 'fact') {
+        const facts = [...(m.facts || [])]; const i = facts.findIndex(f => f.topic === item.topic);
+        const f = { topic:item.topic, text:value != null ? value : (i >= 0 ? facts[i].text : ''), share:share != null ? share : (i >= 0 ? facts[i].share : '') };
+        if (i >= 0) facts[i] = f; else facts.push(f);
+        m.facts = facts; patch.facts = facts;
+      } else if (item.type === 'cal') { m.cal = { ...(m.cal || {}), [item.k]:value }; patch.cal = m.cal; }
+      else {
+        m.ans = { ...(m.ans || {}), [item.k]:value }; patch.ans = m.ans;
+        if ((m.pre || []).includes(item.k)) { m.conf = { ...(m.conf || {}), [item.k]:true }; patch.conf = m.conf; }
+      }
+      patch.updatedAt = new Date().toISOString();
+      if (S.db) await S.db.doc('models/' + W.id).update(patch);
+    }
+    note(t('saved'));
+  } catch (e) { note(e && e.code === 'not_granted' ? t('readonly') : t('saveFail')); }
+}
+
+async function saveGate(id, k, v) {
+  const m = S.models[id]; m.gates = { ...(m.gates || {}), [k]:v };
+  render();
+  try { if (S.db) await S.db.doc('models/' + id).update({ gates:m.gates, updatedAt:new Date().toISOString() }); } catch (e) {}
+}
+
+
+const DEMO_NOTE = { he:'מצב הדגמה: דוגמניות לדוגמה בלבד. אפשר ללחוץ ולמלא, אבל השינויים לא נשמרים.', en:'Demo mode: sample models only. You can click and fill in, but changes are not saved.' };
+function demoData() {
+  const mk = (id, he, en, order, ans, facts, gates, extra) => ({ id, name:{he,en}, lang:'עברית', agencyLabel:S.lang === 'he' ? 'סוכנות לדוגמה' : 'Sample agency', order, ans, pre:Object.keys(ans), conf:{}, facts, gates, calItems:[], cal:{}, conflicts:[], ...(extra || {}) });
+  const full = { fan_name:'דנה', age:'27', city:'חיפה', rel:'רווקה', hair:'שחור ארוך', eyes:'ירוקות', height:'1.68', job:'מדריכת יוגה', lang:'עברית', persona_type:'בת השכן', personality:'חמה, צוחקת הרבה, ישירה', never_does:'לא נפגשת, לא עושה שיחות וידאו', lvl_channel:'הלבשה תחתונה ובגדי ים', lvl_paid:'עד עירום מלא', unlockly:'dana_demo', tg_channel:'t.me/dana_demo', tg_own:'יש', style:'קצר, בלי נקודות, שאלה בסוף', meet:'לא פוסלת ולא ממהרת' };
+  const all = Object.fromEntries(GATES.map(g => [g.k, 'done']));
+  const models = {
+    dana: mk('dana', 'דנה', 'Dana', 0, { ...full, lvl_paid:'', tg_own:'בתהליך' }, [{topic:'pets',text:"יש לה חתול ג'ינג'י בשם שוקו",share:'persona'},{topic:'music',text:'פופ ישראלי ואינדי',share:'persona'},{topic:'family',text:'אחות אחת קטנה',share:''}], { vault:'done', persona:'done', loaded:'wip' },
+      { calItems:[{ fan:{he:'שאל מה היא עושה הערב',en:'Asked what she is doing tonight'}, bot:'הערב אני בבית. מה איתך?' }], conflicts:[{he:'בטופס כתוב שהיא לא נפגשת, בצד הקלדנים כתוב "לא פוסלת". צריך כלל אחד',en:'The form says she never meets fans, the chatter side says "not ruling it out". One rule is needed'}] }),
+    lia: mk('lia', 'ליה', 'Lia', 1, { fan_name:'ליה', age:'24', city:'תל אביב', hair:'בלונד', persona_type:'יוקרתית' }, [], { vault:'done' }),
+    tal: mk('tal', 'טל', 'Tal', 2, {}, [], {}),
+    ella: mk('ella', 'אלה', 'Ella', 3, full, [{topic:'sport',text:'רצה שלוש פעמים בשבוע',share:'persona'}], all)
+  };
+  const rules = {}; RULES.slice(0, 9).forEach(([k]) => { rules[k] = { a:'תשובה לדוגמה של הסוכנות' }; });
+  return { models, agency:{ rules } };
+}
+function startDemo() { const d = demoData(); S.db = null; S.demo = true; S.models = d.models; S.agency = d.agency; S.ready = true; render(); }
+
+/* ---------- routing + render ---------- */
+function go(r) { location.hash = r ? '#' + r : ''; if (!r) route(); }
+function route() { S.route = (location.hash || '').slice(1); render(); window.scrollTo(0, 0); }
+function render() {
+  const app = document.getElementById('app');
+  app.dir = S.lang === 'he' ? 'rtl' : 'ltr'; app.lang = S.lang;
+  document.getElementById('lang-he').setAttribute('aria-pressed', String(S.lang === 'he'));
+  document.getElementById('lang-en').setAttribute('aria-pressed', String(S.lang === 'en'));
+  document.getElementById('agency-name').textContent = S.demo ? (S.lang === 'he' ? 'סוכנות לדוגמה' : 'Sample agency') : (S.lang === 'he' ? 'BALAGAN · ישראל' : 'BALAGAN · Israel');
+  const dn = document.getElementById('demo-note'); dn.hidden = !S.demo; dn.textContent = S.demo ? DEMO_NOTE[S.lang] : '';
+  const view = document.getElementById('view');
+  if (!S.ready) return;
+  view.replaceChildren(S.route.startsWith('m-') ? viewModel(S.route.slice(2)) : viewHome());
+}
+function setLang(l) { S.lang = l; try { localStorage.setItem('us_lang', l); } catch (e) {} render(); if (S.wz) renderWizard(); }
+document.getElementById('lang-he').onclick = () => setLang('he');
+document.getElementById('lang-en').onclick = () => setLang('en');
+document.getElementById('home-btn').onclick = () => go('');
+window.addEventListener('hashchange', route);
+route();
+
+(async () => {
+  const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
+  S.db = db;
+  if (!db) { startDemo(); return; }
+  let gotM = false, gotA = false;
+  const done = () => { if (gotM && gotA) { S.ready = true; render(); } };
+  db.collection('models').onSnapshot((snap) => {
+    if (S.demo) return; if (snap.empty && !gotM) { startDemo(); return; }
+    const next = {}; snap.docs.forEach(d => { next[d.id] = { id:d.id, ...d.data() }; });
+    S.models = next; gotM = true; if (!S.ready) done(); else if (!S.wz) render();
+  }, () => { if (!S.ready) startDemo(); });
+  db.doc('agency/balagan').onSnapshot((snap) => {
+    if (S.demo) return;
+    S.agency = snap.exists ? snap.data() : { rules:{} }; if (!S.agency.rules) S.agency.rules = {};
+    gotA = true; if (!S.ready) done(); else if (!S.wz) render();
+  }, () => { if (!S.demo) { S.agency = { rules:{} }; gotA = true; done(); } });
+})();
+})();
+</script>
+</body></html>
